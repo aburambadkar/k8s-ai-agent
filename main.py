@@ -67,7 +67,7 @@ def _print_banner():
     console.print(
         f"""
 [bold cyan]╔══════════════════════════════════════════════════════════╗
-║          🤖  K8s AI Agent — Pod Health Monitor           ║
+║             K8s AI Agent — Pod Health Monitor            ║
 ╚══════════════════════════════════════════════════════════╝[/bold cyan]
   LLM endpoint : [cyan]{config.LLM_BASE_URL}[/cyan]
   Model        : [cyan]{config.LLM_MODEL}[/cyan]

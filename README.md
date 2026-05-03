@@ -229,7 +229,7 @@ Add or remove entries from `WATCHED_REASONS` in `config.py` to tune scope.
 
 ```
 ╔══════════════════════════════════════════════════════════╗
-║          🤖  K8s AI Agent — Pod Health Monitor           ║
+║             K8s AI Agent — Pod Health Monitor            ║
 ╚══════════════════════════════════════════════════════════╝
   LLM endpoint : http://x.x.x.x:18080/v1
   Model        : gpt-oss-120b-mxfp4
@@ -241,7 +241,7 @@ Add or remove entries from `WATCHED_REASONS` in `config.py` to tune scope.
 
   ╭─────────────────────── Unhealthy Pods ───────────────────────╮
   │ Namespace    Pod                       Reason           Dur  │
-  │ production   payments-api-7d4b9f-xkqr2 CrashLoopBackOff 28m │
+  │ production   payments-api-7d4b9f-xkqr2 CrashLoopBackOff 28m  │
   │ ml-services  ml-inference-59b7c-zzp4h  OOMKilled        10m  │
   │ default      report-worker-6fc8-mwp9t  ImagePullBackOff 45m  │
   ╰──────────────────────────────────────────────────────────────╯
@@ -250,17 +250,17 @@ Add or remove entries from `WATCHED_REASONS` in `config.py` to tune scope.
   Tools called (2 rounds): get_pod_logs → describe_pod
 
   ╭─ Diagnosis: payments-api-7d4b9f-xkqr2 ─────────────────────╮
-  │                                                              │
-  │  ROOT CAUSE: The container is failing because it cannot     │
+  │                                                            │
+  │  ROOT CAUSE: The container is failing because it cannot    │
   │  connect to PostgreSQL at db.internal:5432 on startup.     │
-  │                                                              │
-  │  SUGGESTED FIX:                                             │
-  │  1. Verify the 'postgres' Service exists in 'production'    │
-  │  2. Check DB_HOST env var — should match the service name   │
-  │  3. Confirm the database pod itself is Running and Ready    │
-  │  4. Check NetworkPolicy rules if mTLS is in use             │
-  │                                                              │
-  ╰──────────────────────────────────────────────────────────────╯
+  │                                                            │
+  │  SUGGESTED FIX:                                            │
+  │  1. Verify the 'postgres' Service exists in 'production'   │
+  │  2. Check DB_HOST env var — should match the service name  │
+  │  3. Confirm the database pod itself is Running and Ready   │
+  │  4. Check NetworkPolicy rules if mTLS is in use            │
+  │                                                            │
+  ╰────────────────────────────────────────────────────────────╯
   📄 Logged to logs/diagnoses.jsonl
 ```
 
