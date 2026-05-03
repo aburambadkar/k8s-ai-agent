@@ -1,0 +1,47 @@
+# ─── Test: CreateContainerConfigError ────────────────────────────────────────
+#
+# WHY IT BREAKS: The pod references a Secret called "app-db-credentials" and
+#                a ConfigMap called "app-config" that do not exist in the
+#                namespace. Kubernetes cannot create the container at all —
+#                it never even starts.
+#
+# Expected agent tools: describe_pod (logs will be empty — container never ran)
+#   Events will show: "Error: secret 'app-db-credentials' not found"
+#
+# Real-world equivalent: Secret/ConfigMap was not deployed before the app,
+#                        wrong namespace, or a typo in the resource name.
+#
+# Apply:  kubectl apply -f 04-config-error.yaml
+# Check:  kubectl get pod -n agent-test test-config-error
+# Clean:  kubectl delete -f 04-config-error.yaml
+#
+# NOTE: To fix this pod intentionally, run:
+#   kubectl create secret generic app-db-credentials \
+#     --from-literal=password=supersecret -n agent-test
+#   kubectl create configmap app-config \
+#     --from-literal=APP_ENV=production -n agent-test
+# ─────────────────────────────────────────────────────────────────────────────
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-config-error
+  namespace: agent-test
+  labels:
+    test-case: create-container-config-error
+spec:
+  containers:
+    - name: app
+      image: busybox:1.36
+      command: ["/bin/sh", "-c", "echo $DB_PASSWORD && sleep 3600"]
+      env:
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: app-db-credentials    # ← Secret does not exist
+              key: password
+        - name: APP_ENV
+          valueFrom:
+            configMapKeyRef:
+              name: app-config            # ← ConfigMap does not exist
+              key: APP_ENV
+  restartPolicy: Always

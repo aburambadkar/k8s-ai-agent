@@ -1,0 +1,29 @@
+# ─── Test: ImagePullBackOff ───────────────────────────────────────────────────
+#
+# WHY IT BREAKS: The image tag "v99.9.9-does-not-exist" doesn't exist on
+#                Docker Hub, so kubelet can never pull it.
+#
+# Expected agent tools: get_pod_events → describe_pod
+#   Events will show: "Failed to pull image ... 404 Not Found"
+#
+# Real-world equivalent: Someone pushed a Helm chart with a wrong image tag,
+#                        or a private registry secret is missing/wrong.
+#
+# Apply:  kubectl apply -f 01-image-pull-backoff.yaml
+# Check:  kubectl get pod -n agent-test test-image-pull-backoff
+# Clean:  kubectl delete -f 01-image-pull-backoff.yaml
+# ─────────────────────────────────────────────────────────────────────────────
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-image-pull-backoff
+  namespace: agent-test
+  labels:
+    test-case: image-pull-backoff
+spec:
+  containers:
+    - name: app
+      image: nginx:v99.9.9-does-not-exist   # ← this tag does not exist
+      ports:
+        - containerPort: 80
+  restartPolicy: Always

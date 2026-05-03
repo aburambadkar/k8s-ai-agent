@@ -1,0 +1,47 @@
+# ─── Test: CrashLoopBackOff ──────────────────────────────────────────────────
+#
+# WHY IT BREAKS: The container prints a startup error message and immediately
+#                exits with code 1. Kubernetes restarts it in a back-off loop.
+#
+# Expected agent tools: get_pod_logs → describe_pod
+#   Logs will show: "FATAL: Could not connect to database at db.internal:5432"
+#   This mimics a real app that fails because its dependency isn't ready.
+#
+# Real-world equivalent: App container starts before its database is up,
+#                        or a required env var is missing/wrong.
+#
+# Apply:  kubectl apply -f 02-crash-loop-backoff.yaml
+# Check:  kubectl get pod -n agent-test test-crash-loop
+# Logs:   kubectl logs -n agent-test test-crash-loop --previous
+# Clean:  kubectl delete -f 02-crash-loop-backoff.yaml
+# ─────────────────────────────────────────────────────────────────────────────
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-crash-loop
+  namespace: agent-test
+  labels:
+    test-case: crash-loop-backoff
+spec:
+  containers:
+    - name: app
+      image: busybox:1.36
+      command:
+        - /bin/sh
+        - -c
+        - |
+          echo "INFO  Starting payments-api v2.3.1"
+          echo "INFO  Reading config from environment..."
+          echo "INFO  DB_HOST=${DB_HOST:-db.internal}"
+          echo "INFO  DB_PORT=${DB_PORT:-5432}"
+          echo "INFO  Attempting database connection..."
+          sleep 1
+          echo "ERROR dial tcp ${DB_HOST:-db.internal}:${DB_PORT:-5432}: connect: connection refused"
+          echo "FATAL Could not connect to database after 3 retries — exiting"
+          exit 1
+      env:
+        - name: DB_HOST
+          value: "db.internal"
+        - name: DB_PORT
+          value: "5432"
+  restartPolicy: Always

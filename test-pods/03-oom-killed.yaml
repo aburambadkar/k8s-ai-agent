@@ -1,0 +1,45 @@
+# ─── Test: OOMKilled ─────────────────────────────────────────────────────────
+#
+# WHY IT BREAKS: The container is given a 15Mi memory limit, then immediately
+#                allocates ~50Mi using /dev/zero → the Linux OOM killer
+#                terminates it with exit code 137. Kubernetes restarts it,
+#                triggering CrashLoopBackOff with Last State: OOMKilled.
+#
+# Expected agent tools: get_pod_logs → describe_pod
+#   describe will show: "Last State: Terminated  Reason: OOMKilled  Exit Code: 137"
+#
+# Real-world equivalent: Memory limit set too low for the workload,
+#                        or an unexpected memory leak in the application.
+#
+# Apply:  kubectl apply -f 03-oom-killed.yaml
+# Check:  kubectl get pod -n agent-test test-oom-killed
+# Clean:  kubectl delete -f 03-oom-killed.yaml
+# ─────────────────────────────────────────────────────────────────────────────
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-oom-killed
+  namespace: agent-test
+  labels:
+    test-case: oom-killed
+spec:
+  containers:
+    - name: memory-hog
+      image: busybox:1.36
+      command:
+        - /bin/sh
+        - -c
+        - |
+          echo "INFO  ml-inference-server starting up"
+          echo "INFO  Loading model weights into memory..."
+          # Allocate ~50MB — well above the 15Mi limit — triggering OOM kill
+          dd if=/dev/zero bs=1M count=50 | tail -c 1
+          echo "INFO  This line will never be reached"
+      resources:
+        requests:
+          memory: "10Mi"
+          cpu: "50m"
+        limits:
+          memory: "15Mi"   # ← intentionally too low; container will be OOM-killed
+          cpu: "100m"
+  restartPolicy: Always

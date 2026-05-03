@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+.Python
+env/
+venv/
+.venv/
+pip-wheel-metadata/
+
+# Virtual environments
+venv/
+.venv/
+ENV/
+
+# Agent runtime files
+logs/*.jsonl
+logs/agent_state.json
+logs/agent_state.tmp
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Environment / secrets
+.env
+.env.*
+*.env
+
+# Test artifacts
+.pytest_cache/
+.coverage
+htmlcov/

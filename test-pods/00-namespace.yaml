@@ -1,0 +1,11 @@
+# Creates an isolated namespace for all test pods.
+# Apply this first, delete it last to clean everything up in one shot.
+#
+# Apply:  kubectl apply -f 00-namespace.yaml
+# Nuke:   kubectl delete namespace agent-test
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: agent-test
+  labels:
+    purpose: k8s-ai-agent-testing
