@@ -12,9 +12,9 @@ analysis with a suggested fix — all without human intervention.
 |---|---|
 | **Agentic loop** | `main.py` — polls the cluster every N seconds indefinitely |
 | **Tool use** | `tools/k8s_tools.py` — four kubectl-backed tools the LLM can call |
-| **ReAct pattern** | `agent/llm_client.py` — manual Reason → Act → Observe loop |
-| **State management** | `agent/state_manager.py` — skips already-diagnosed pods, prunes resolved ones |
-| **OpenAI tool-calling API** | `agent/llm_client.py` + `tools/k8s_tools.py` (schema definitions) |
+| **ReAct pattern** | `agent/__init__.py` — manual Reason → Act → Observe loop |
+| **State management** | `agent/__init__.py` — skips already-diagnosed pods, prunes resolved ones |
+| **OpenAI tool-calling API** | `agent/__init__.py` + `tools/k8s_tools.py` (schema definitions) |
 | **Graceful shutdown** | `main.py` — SIGINT/SIGTERM handled cleanly |
 | **Simulation mode** | `--simulate` flag — run and demo without a live cluster |
 | **Audit logging** | `logs/diagnoses.jsonl` — append-only structured log of every diagnosis |
@@ -89,20 +89,22 @@ k8s-ai-agent/
 ├── main.py                  # Entry point — polling loop + graceful shutdown
 ├── config.py                # All configuration (env-var overridable)
 │
+├── agent/
+│   └── __init__.py          # All agent logic: state, LLM client, ReAct loop, display
+│
 ├── tools/
 │   ├── __init__.py
 │   └── k8s_tools.py         # kubectl wrappers + OpenAI tool JSON schemas
 │                              Also contains simulation fixtures
 │
-├── agent/
-│   ├── __init__.py
-│   ├── llm_client.py        # OpenAI client + manual ReAct tool-calling loop
-│   ├── state_manager.py     # Persistent state (diagnosed pods tracker)
-│   └── k8s_agent.py         # Orchestrator — runs one full cycle
-│
 ├── logs/
 │   ├── agent_state.json     # [generated] which pods are already diagnosed
 │   └── diagnoses.jsonl      # [generated] append-only audit log
+│
+├── test-pods/               # Sample YAML files to deploy intentionally broken pods
+│   ├── 00-namespace.yaml
+│   ├── 01–05  *.yaml        # One file per error type (CrashLoop, OOMKilled, etc.)
+│   └── apply-all.sh         # Deploy all test pods in one shot
 │
 ├── requirements.txt
 ├── .gitignore
@@ -127,15 +129,16 @@ pip install -r requirements.txt
 
 ### 2. Configure the LLM
 
-The agent expects an **OpenAI-compatible** server (LM Studio, Ollama,
-LocalAI, llama.cpp, etc.) at the configured base URL.
+The agent connects to a **llama.cpp** server running `gpt-oss-120b-mxfp4`
+on a local LAN machine. Any OpenAI-compatible server works — just update
+the two variables below.
 
 ```bash
-# Default — already points at the LAN server
+# Default — already points at the LAN llama.cpp server
 LLM_BASE_URL=http://192.168.50.175:18080/v1
 
-# Override model if the server serves a different model name
-export LLM_MODEL=gemma3:4b
+# Override if running a different model
+export LLM_MODEL=gpt-oss-120b-mxfp4
 ```
 
 ### 3. Run
@@ -159,13 +162,13 @@ All settings are read from environment variables with sensible defaults.
 
 | Variable | Default | Description |
 |---|---|---|
-| `LLM_BASE_URL` | `http://192.168.50.175:18080/v1` | OpenAI-compatible server base URL |
-| `LLM_MODEL` | `gemma3:4b` | Model name served at LLM_BASE_URL |
+| `LLM_BASE_URL` | `http://192.168.50.175:18080/v1` | OpenAI-compatible server base URL (llama.cpp) |
+| `LLM_MODEL` | `gpt-oss-120b-mxfp4` | Model name served at LLM_BASE_URL |
 | `LLM_API_KEY` | `not-required` | API key (most local servers ignore this) |
-| `LLM_TEMPERATURE` | `0.2` | Lower = more focused answers |
+| `LLM_TEMPERATURE` | `0.8` | Higher = more varied responses |
 | `LLM_MAX_TOOL_ROUNDS` | `8` | Max tool-call rounds per diagnosis |
-| `POLL_INTERVAL_SECONDS` | `120` | How often to scan the cluster |
-| `UNHEALTHY_THRESHOLD_SECONDS` | `120` | Min duration before a pod is flagged |
+| `POLL_INTERVAL_SECONDS` | `30` | How often to scan the cluster |
+| `UNHEALTHY_THRESHOLD_SECONDS` | `60` | Min duration before a pod is flagged |
 | `WATCHED_NAMESPACE` | *(all)* | Restrict to one namespace |
 | `REDIAGNOSE_AFTER_HOURS` | `24` | Re-diagnose stale entries after N hours |
 | `STATE_FILE` | `logs/agent_state.json` | Where state is persisted |
@@ -229,7 +232,7 @@ Add or remove entries from `WATCHED_REASONS` in `config.py` to tune scope.
 ║          🤖  K8s AI Agent — Pod Health Monitor           ║
 ╚══════════════════════════════════════════════════════════╝
   LLM endpoint : http://192.168.50.175:18080/v1
-  Model        : gemma3:4b
+  Model        : gpt-oss-120b-mxfp4
   Mode         : SIMULATION MODE
 
 ──────────── 🔍 Cycle #1  ·  2024-03-12 08:30:00 UTC ─────────────
