@@ -135,7 +135,7 @@ the two variables below.
 
 ```bash
 # Default — already points at the LAN llama.cpp server
-LLM_BASE_URL=http://192.168.50.175:18080/v1
+LLM_BASE_URL=http://x.x.x.x:18080/v1
 
 # Override if running a different model
 export LLM_MODEL=gpt-oss-120b-mxfp4
@@ -162,7 +162,7 @@ All settings are read from environment variables with sensible defaults.
 
 | Variable | Default | Description |
 |---|---|---|
-| `LLM_BASE_URL` | `http://192.168.50.175:18080/v1` | OpenAI-compatible server base URL (llama.cpp) |
+| `LLM_BASE_URL` | `http://x.x.x.x:18080/v1` | OpenAI-compatible server base URL (llama.cpp) |
 | `LLM_MODEL` | `gpt-oss-120b-mxfp4` | Model name served at LLM_BASE_URL |
 | `LLM_API_KEY` | `not-required` | API key (most local servers ignore this) |
 | `LLM_TEMPERATURE` | `0.8` | Higher = more varied responses |
@@ -231,7 +231,7 @@ Add or remove entries from `WATCHED_REASONS` in `config.py` to tune scope.
 ╔══════════════════════════════════════════════════════════╗
 ║          🤖  K8s AI Agent — Pod Health Monitor           ║
 ╚══════════════════════════════════════════════════════════╝
-  LLM endpoint : http://192.168.50.175:18080/v1
+  LLM endpoint : http://x.x.x.x:18080/v1
   Model        : gpt-oss-120b-mxfp4
   Mode         : SIMULATION MODE
 
