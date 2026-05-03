@@ -9,8 +9,8 @@ import os
 
 # ─── LLM Settings ─────────────────────────────────────────────────────────────
 
-# Base URL of an OpenAI-compatible API (LM Studio, Ollama, LocalAI, llama.cpp, etc.)
-LLM_BASE_URL = os.getenv("LLM_BASE_URL", "http://192.168.50.175:18080/v1")
+# Base URL of an OpenAI-compatible API (LM Studio, Ollama, LocalAI, llama.cpp, etc. (#example: http://192.168.50.175:18080/v1))
+LLM_BASE_URL = os.getenv("LLM_BASE_URL", "http://x.x.x.x:18080/v1")
 
 # Most local servers accept any non-empty string as the API key
 LLM_API_KEY = os.getenv("LLM_API_KEY", "not-required")
