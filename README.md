@@ -25,7 +25,7 @@ analysis with a suggested fix — all without human intervention.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                     K8s AI Agent — One Cycle                           │
+│                     K8s AI Agent — One Cycle                            │
 │                                                                         │
 │  1. DETECT  ──► kubectl get pods --all-namespaces -o json               │
 │                 Filter: pods unhealthy > threshold (default 2 min)      │
@@ -35,14 +35,14 @@ analysis with a suggested fix — all without human intervention.
 │                                                                         │
 │  3. DIAGNOSE (for each new pod)                                         │
 │     ┌───────────────────────────────────────────────────────────┐       │
-│     │        ReAct Loop (Reason → Act → Observe)               │       │
+│     │        ReAct Loop (Reason → Act → Observe)                │       │
 │     │                                                           │       │
 │     │  messages = [system_prompt, "investigate this pod"]       │       │
-│     │  ┌─────────────────────────────────────────────────┐     │       │
-│     │  │  LLM(messages, tools) ──► tool_call?            │     │       │
-│     │  │    YES → execute tool, add result to messages   │     │       │
-│     │  │    NO  → final answer (root cause + fix) ───────┼──►  │       │
-│     │  └─────────────────────────────────────────────────┘     │       │
+│     │  ┌─────────────────────────────────────────────────┐      │       │
+│     │  │  LLM(messages, tools) ──► tool_call?            │      │       │
+│     │  │    YES → execute tool, add result to messages   │      │       │
+│     │  │    NO  → final answer (root cause + fix) ───────┼──►   │       │
+│     │  └─────────────────────────────────────────────────┘      │       │
 │     └───────────────────────────────────────────────────────────┘       │
 │                                                                         │
 │  4. LOG  ──► Append to logs/diagnoses.jsonl                             │
